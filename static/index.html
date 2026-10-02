@@ -1,0 +1,921 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Music Stick</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: #111;
+
+            color: white;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+
+        .player {
+
+            width: 420px;
+
+            max-width: 92vw;
+
+            padding: 25px;
+
+            background: #1d1d1d;
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.5);
+
+            text-align: center;
+        }
+
+
+        .cover {
+
+            width: 100%;
+
+            aspect-ratio: 1 / 1;
+
+            object-fit: cover;
+
+            border-radius: 14px;
+
+            display: block;
+
+            background: #333;
+
+            margin-bottom: 22px;
+        }
+
+
+        .artist {
+
+            font-size: 18px;
+
+            color: #aaa;
+
+            margin-bottom: 6px;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        .title {
+
+            font-size: 25px;
+
+            font-weight: bold;
+
+            margin-bottom: 6px;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        .album {
+
+            font-size: 15px;
+
+            color: #888;
+
+            margin-bottom: 25px;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        .time {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            font-size: 13px;
+
+            color: #aaa;
+
+            margin-bottom: 7px;
+        }
+
+
+        .progress-container {
+
+            width: 100%;
+
+            height: 6px;
+
+            background: #444;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            margin-bottom: 25px;
+        }
+
+
+        .progress {
+
+            width: 0%;
+
+            height: 100%;
+
+            background: white;
+
+            border-radius: 10px;
+
+            transition: width 0.3s linear;
+        }
+
+
+        .controls {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 25px;
+        }
+
+
+        button {
+
+            border: none;
+
+            background: #333;
+
+            color: white;
+
+            cursor: pointer;
+
+            border-radius: 50%;
+
+            width: 48px;
+
+            height: 48px;
+
+            font-size: 18px;
+
+            transition:
+                background 0.15s,
+                transform 0.1s;
+        }
+
+
+        button:hover {
+
+            background: #555;
+        }
+
+
+        button:active {
+
+            transform: scale(0.92);
+        }
+
+
+        .play-button {
+
+            width: 62px;
+
+            height: 62px;
+
+            font-size: 24px;
+
+            background: white;
+
+            color: black;
+        }
+
+
+        .play-button:hover {
+
+            background: #ddd;
+        }
+
+
+        .secondary-controls {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+
+        .secondary-controls button {
+
+            width: 40px;
+
+            height: 40px;
+
+            font-size: 15px;
+        }
+
+
+        .volume-container {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 20px;
+        }
+
+
+        .volume-container span {
+
+            font-size: 18px;
+        }
+
+
+        #volume {
+
+            width: 100%;
+
+            cursor: pointer;
+        }
+
+
+        .status {
+
+            margin-top: 18px;
+
+            font-size: 12px;
+
+            color: #777;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="player">
+
+
+    <img
+        id="cover"
+        class="cover"
+        src="/cover"
+        alt="Portada"
+    >
+
+
+    <div
+        id="artist"
+        class="artist"
+    >
+        Artista desconocido
+    </div>
+
+
+    <div
+        id="title"
+        class="title"
+    >
+        Sin título
+    </div>
+
+
+    <div
+        id="album"
+        class="album"
+    >
+        Sin álbum
+    </div>
+
+
+    <div class="time">
+
+        <span id="current-time">
+            00:00
+        </span>
+
+        <span id="duration">
+            00:00
+        </span>
+
+    </div>
+
+
+    <div
+        id="progress-container"
+        class="progress-container"
+    >
+
+        <div
+            id="progress"
+            class="progress"
+        ></div>
+
+    </div>
+
+
+    <div class="controls">
+
+
+        <button
+            onclick="previous()"
+            title="Canción anterior"
+        >
+            ⏮
+        </button>
+
+
+        <button
+            onclick="backward()"
+            title="Retroceder 10 segundos"
+        >
+            ↶
+        </button>
+
+
+        <button
+            id="play-button"
+            class="play-button"
+            onclick="playPause()"
+            title="Reproducir / Pausar"
+        >
+            ▶
+        </button>
+
+
+        <button
+            onclick="forward()"
+            title="Adelantar 10 segundos"
+        >
+            ↷
+        </button>
+
+
+        <button
+            onclick="next()"
+            title="Siguiente canción"
+        >
+            ⏭
+        </button>
+
+
+    </div>
+
+
+    <div class="secondary-controls">
+
+
+        <button
+            onclick="volumeDown()"
+            title="Bajar volumen"
+        >
+            −
+        </button>
+
+
+        <span>
+            🔊
+        </span>
+
+
+        <button
+            onclick="volumeUp()"
+            title="Subir volumen"
+        >
+            +
+        </button>
+
+
+    </div>
+
+
+    <div class="volume-container">
+
+        <input
+            id="volume"
+            type="range"
+            min="0"
+            max="512"
+            value="256"
+            oninput="setVolume(this.value)"
+        >
+
+    </div>
+
+
+    <div
+        id="status"
+        class="status"
+    >
+        Conectando...
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+// =====================================================
+// VARIABLES
+// =====================================================
+
+let ultimaCancion = "";
+
+let ultimaPortada = "";
+
+
+// =====================================================
+// FORMATO DE TIEMPO
+// =====================================================
+
+function formatoTiempo(segundos) {
+
+    segundos = Number(segundos) || 0;
+
+    const minutos =
+        Math.floor(segundos / 60);
+
+    const segundosRestantes =
+        Math.floor(segundos % 60);
+
+    return (
+        String(minutos).padStart(2, "0")
+        +
+        ":"
+        +
+        String(segundosRestantes).padStart(2, "0")
+    );
+}
+
+
+// =====================================================
+// OBTENER INFORMACION
+// =====================================================
+
+async function actualizar() {
+
+    try {
+
+        const response =
+            await fetch("/now-playing");
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Error HTTP " + response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        // ---------------------------------------------
+        // INFORMACION
+        // ---------------------------------------------
+
+        document.getElementById("artist").textContent =
+            data.artista;
+
+        document.getElementById("title").textContent =
+            data.titulo;
+
+        document.getElementById("album").textContent =
+            data.album;
+
+
+        // ---------------------------------------------
+        // TIEMPO
+        // ---------------------------------------------
+
+        document.getElementById("current-time").textContent =
+            formatoTiempo(data.tiempo);
+
+        document.getElementById("duration").textContent =
+            formatoTiempo(data.duracion);
+
+
+        // ---------------------------------------------
+        // PROGRESO
+        // ---------------------------------------------
+
+        let porcentaje = 0;
+
+        if (data.duracion > 0) {
+
+            porcentaje =
+                (data.tiempo / data.duracion) * 100;
+        }
+
+        porcentaje =
+            Math.min(
+                100,
+                Math.max(0, porcentaje)
+            );
+
+
+        document.getElementById("progress").style.width =
+            porcentaje + "%";
+
+
+        // ---------------------------------------------
+        // PLAY / PAUSE
+        // ---------------------------------------------
+
+        const playButton =
+            document.getElementById("play-button");
+
+
+        if (data.estado === "playing") {
+
+            playButton.textContent = "❚❚";
+
+        } else {
+
+            playButton.textContent = "▶";
+        }
+
+
+        // ---------------------------------------------
+        // VOLUMEN
+        // ---------------------------------------------
+
+        document.getElementById("volume").value =
+            data.volumen;
+
+
+        // ---------------------------------------------
+        // DETECTAR CAMBIO DE CANCION
+        // ---------------------------------------------
+
+        const identificador =
+            data.artista
+            +
+            "|"
+            +
+            data.titulo;
+
+
+        if (
+            ultimaCancion !== ""
+            &&
+            ultimaCancion !== identificador
+        ) {
+
+            actualizarPortada();
+        }
+
+
+        ultimaCancion =
+            identificador;
+
+
+        document.getElementById("status").textContent =
+            data.estado;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("status").textContent =
+            "No se pudo conectar con FastAPI";
+    }
+}
+
+
+// =====================================================
+// ACTUALIZAR PORTADA
+// =====================================================
+
+function actualizarPortada() {
+
+    const cover =
+        document.getElementById("cover");
+
+
+    const timestamp =
+        new Date().getTime();
+
+
+    cover.src =
+        "/cover?t=" + timestamp;
+}
+
+
+// =====================================================
+// PLAY / PAUSE
+// =====================================================
+
+async function playPause() {
+
+    await fetch(
+        "/control/play-pause",
+        {
+            method: "POST"
+        }
+    );
+
+    actualizar();
+}
+
+
+// =====================================================
+// SIGUIENTE
+// =====================================================
+
+async function next() {
+
+    await fetch(
+        "/control/next",
+        {
+            method: "POST"
+        }
+    );
+
+    setTimeout(
+        actualizarPortada,
+        300
+    );
+
+    setTimeout(
+        actualizar,
+        300
+    );
+}
+
+
+// =====================================================
+// ANTERIOR
+// =====================================================
+
+async function previous() {
+
+    await fetch(
+        "/control/previous",
+        {
+            method: "POST"
+        }
+    );
+
+    setTimeout(
+        actualizarPortada,
+        300
+    );
+
+    setTimeout(
+        actualizar,
+        300
+    );
+}
+
+
+// =====================================================
+// ADELANTAR
+// =====================================================
+
+async function forward() {
+
+    await fetch(
+        "/control/forward?segundos=10",
+        {
+            method: "POST"
+        }
+    );
+
+    actualizar();
+}
+
+
+// =====================================================
+// REGRESAR
+// =====================================================
+
+async function backward() {
+
+    await fetch(
+        "/control/backward?segundos=10",
+        {
+            method: "POST"
+        }
+    );
+
+    actualizar();
+}
+
+
+// =====================================================
+// SUBIR VOLUMEN
+// =====================================================
+
+async function volumeUp() {
+
+    await fetch(
+        "/control/volume/up",
+        {
+            method: "POST"
+        }
+    );
+
+    actualizar();
+}
+
+
+// =====================================================
+// BAJAR VOLUMEN
+// =====================================================
+
+async function volumeDown() {
+
+    await fetch(
+        "/control/volume/down",
+        {
+            method: "POST"
+        }
+    );
+
+    actualizar();
+}
+
+
+// =====================================================
+// VOLUMEN EXACTO
+// =====================================================
+
+async function setVolume(valor) {
+
+    await fetch(
+        "/control/volume?valor=" + valor,
+        {
+            method: "POST"
+        }
+    );
+}
+
+
+// =====================================================
+// CLICK EN BARRA DE PROGRESO
+// =====================================================
+
+document
+    .getElementById("progress-container")
+    .addEventListener(
+        "click",
+        async function(event) {
+
+            try {
+
+                const response =
+                    await fetch("/now-playing");
+
+                const data =
+                    await response.json();
+
+
+                if (data.duracion <= 0) {
+
+                    return;
+                }
+
+
+                const rect =
+                    this.getBoundingClientRect();
+
+
+                const posicion =
+                    event.clientX - rect.left;
+
+
+                const porcentaje =
+                    Math.max(
+                        0,
+                        Math.min(
+                            1,
+                            posicion / rect.width
+                        )
+                    );
+
+
+                const nuevoTiempo =
+                    Math.floor(
+                        data.duracion * porcentaje
+                    );
+
+
+                // Usamos el endpoint de regreso/avance
+                // según la posición seleccionada.
+
+                const diferencia =
+                    nuevoTiempo - data.tiempo;
+
+
+                if (diferencia > 0) {
+
+                    await fetch(
+                        "/control/forward?segundos="
+                        +
+                        Math.floor(diferencia),
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                } else if (diferencia < 0) {
+
+                    await fetch(
+                        "/control/backward?segundos="
+                        +
+                        Math.floor(Math.abs(diferencia)),
+                        {
+                            method: "POST"
+                        }
+                    );
+                }
+
+
+                actualizar();
+
+            } catch (error) {
+
+                console.error(error);
+            }
+
+        }
+    );
+
+
+// =====================================================
+// ACTUALIZACION AUTOMATICA
+// =====================================================
+
+actualizar();
+
+setInterval(
+    actualizar,
+    1000
+);
+
+</script>
+
+
+</body>
+
+</html>
+
